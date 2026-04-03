@@ -10,7 +10,7 @@
         #app-wrapper { display: flex; flex-direction: column; height: 100%; width: 100%; }
         
         .header { background: #1a1a1a; color: white; padding: 15px; text-align: center; flex-shrink: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10; position: relative; }
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
+        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 160px; -webkit-overflow-scrolling: touch; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         
         .card { background: #ffffff; border-radius: 18px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea; display: flex; flex-direction: column; justify-content: space-between; min-height: 190px; }
@@ -21,7 +21,6 @@
         .btn-qtd { background: #007bff; color: white; border: none; width: 38px; height: 38px; border-radius: 12px; font-weight: bold; font-size: 22px; cursor: pointer; }
         .qtd-val { font-weight: 800; font-size: 18px; min-width: 20px; color: #1a1a1a; }
         
-        /* Barra Inferior Fixa para iOS */
         .barra { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; padding: 15px 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 999; border-top: 5px solid #27ae60; }
         .btn-limpar { background: #ff4757; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         .btn-finalizar { background: #2ecc71; color: white; border: none; padding: 16px 25px; border-radius: 15px; font-weight: 900; font-size: 14px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); }
@@ -61,7 +60,7 @@
             
             <button class="btn-copiar-pix" onclick="gerarPixCopiaECola()">
                 1. GERAR E COPIAR PIX
-                <div style="font-size: 9px; font-weight: 700; color: #666; margin-top: 4px;">(COPIA VALOR E CHAVE)</div>
+                <div style="font-size: 9px; font-weight: 700; color: #666; margin-top: 4px;">(SE FALHAR, O CÓDIGO APARECERÁ NA TELA)</div>
             </button>
 
             <a id="btn-wpp" href="#" onclick="concluirVenda('PAGO VIA PIX')" target="_blank" class="btn-wpp">2. ENVIAR COMPROVANTE</a>
@@ -72,9 +71,7 @@
     </div>
 
     <script>
-        // LINK DA SUA PLANILHA JÁ CONFIGURADO ABAIXO:
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJFheNePSmyffRDfVQn1rt4YkZ4iTCIC2PoJUvvLOit4P7OLjHHXljSI77pXtCVWmjBg/exec";
-        
         let configLoja = {}; let car = {}; let listaProds = [];
 
         async function inicializar() {
@@ -133,18 +130,19 @@
                 for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
             }
             let pixBRCode = payload + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-            
-            // Comando nativo de cópia (Funciona no iOS/Safari fora do iFrame)
-            const el = document.createElement('textarea');
-            el.value = pixBRCode;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            
-            const toast = document.getElementById("toast");
-            toast.className = "show"; 
-            setTimeout(() => toast.className = "", 3000);
+
+            // MÉTODO DEFINITIVO: Tenta API moderna, se o iOS travar, abre caixa de texto
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(pixBRCode).then(() => {
+                    const toast = document.getElementById("toast");
+                    toast.className = "show"; 
+                    setTimeout(() => toast.className = "", 3000);
+                }).catch(err => {
+                    window.prompt("O Safari bloqueou a cópia automática. Copie o código abaixo:", pixBRCode);
+                });
+            } else {
+                window.prompt("Copia o código PIX abaixo:", pixBRCode);
+            }
         }
 
         function concluirVenda(tipo) {
