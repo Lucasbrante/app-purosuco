@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puro Suco V20 - Final</title>
+    <title>Puro Suco V20 - OFICIAL</title>
     <style>
-        /* ESTILO ORIGINAL V20 - LIMPO E PROFISSIONAL */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { margin: 0; font-family: -apple-system, sans-serif; background: #ffffff; color: #1a1a1a; }
         .header { background: #1a1a1a; color: #fff; padding: 20px; text-align: center; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; position: sticky; top: 0; z-index: 100; }
         .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; padding-bottom: 120px; }
-        .card { background: #fff; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #efefef; display: flex; flex-direction: column; justify-content: space-between; }
-        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; }
+        .card { background: #fff; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #efefef; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
+        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; border-radius: 10px; }
         .card h3 { font-size: 13px; margin: 5px 0; height: 32px; overflow: hidden; line-height: 1.2; }
         .preco { color: #27ae60; font-weight: 800; font-size: 18px; margin: 8px 0; display: block; }
         .controles { display: flex; align-items: center; justify-content: center; gap: 12px; }
@@ -23,11 +22,13 @@
         .modal-body { background: #fff; padding: 25px; border-radius: 25px; width: 90%; max-width: 360px; text-align: center; }
         .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 18px; border-radius: 15px; font-weight: 900; width: 100%; margin: 15px 0; cursor: pointer; font-size: 13px; }
         .btn-wpp { background: #27ae60; color: #fff; text-decoration: none; padding: 18px; border-radius: 15px; display: block; font-weight: 900; font-size: 14px; text-transform: uppercase; }
+        #status-msg { padding: 20px; text-align: center; font-weight: bold; color: #999; }
     </style>
 </head>
 <body>
 
     <div class="header" id="loja-nome">CARREGANDO...</div>
+    <div id="status-msg">Conectando à planilha...</div>
     <div id="vitrine" class="vitrine"></div>
     
     <div class="barra" id="barra-pedido" style="display:none">
@@ -49,7 +50,7 @@
     </div>
 
     <script>
-        // LINK DO MOTOR (CONECTADO)
+        // SEU LINK JÁ CONFIGURADO
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJFheNePSmyffRDfVQn1rt4YkZ4iTCIC2PoJUvvLOit4P7OLjHHXljSI77pXtCVWmjBg/exec";
 
         let config = {}; let carrinho = {}; let produtos = []; let pixMemo = "";
@@ -57,15 +58,31 @@
         async function carregarDados() {
             try {
                 const res = await fetch(SCRIPT_URL);
+                if (!res.ok) throw new Error();
                 config = await res.json();
+                
                 document.getElementById('loja-nome').innerText = config.nomeLoja;
+                document.getElementById('status-msg').style.display = 'none';
+                
                 let html = '';
                 config.listaProdutos.forEach((p, i) => {
                     produtos.push({nome: p[1], preco: parseFloat(p[2])});
-                    html += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><b class="preco">R$ ${p[2]}</b><div class="controles"><button class="btn-add" onclick="mudarQtd(${i},-1)">-</button><span class="qtd" id="q-${i}">0</span><button class="btn-add" onclick="mudarQtd(${i},1)">+</button></div></div>`;
+                    html += `<div class="card">
+                        <img src="${p[0]}" onerror="this.src='https://via.placeholder.com/150?text=Suco'">
+                        <h3>${p[1]}</h3>
+                        <b class="preco">R$ ${p[2].toLocaleString('pt-br',{minimumFractionDigits:2})}</b>
+                        <div class="controles">
+                            <button class="btn-add" onclick="mudarQtd(${i},-1)">-</button>
+                            <span class="qtd" id="q-${i}">0</span>
+                            <button class="btn-add" onclick="mudarQtd(${i},1)">+</button>
+                        </div>
+                    </div>`;
                 });
                 document.getElementById('vitrine').innerHTML = html;
-            } catch (e) { alert("Erro ao carregar planilha. Verifique a implantação."); }
+            } catch (e) { 
+                document.getElementById('status-msg').innerText = "ERRO: Verifique se as abas CONFIG e PRODUTOS existem e se o Script foi implantado para 'Qualquer Pessoa'.";
+                document.getElementById('status-msg').style.color = "red";
+            }
         }
 
         function mudarQtd(i, delta) {
@@ -83,7 +100,6 @@
             document.getElementById('modal').style.display = 'flex';
             document.getElementById('btn-copy-pix').innerText = "GERANDO CÓDIGO...";
 
-            // BUSCA O PIX NO GOOGLE SCRIPT
             try {
                 const res = await fetch(SCRIPT_URL + "?valor=" + t.replace(',', '.'));
                 const dadosPix = await res.json();
@@ -91,8 +107,10 @@
                 document.getElementById('btn-copy-pix').innerText = "1. CLIQUE PARA COPIAR PIX";
             } catch (e) { document.getElementById('btn-copy-pix').innerText = "ERRO AO GERAR PIX"; }
 
-            let msg = `🛒 *Novo Pedido*\nTotal: R$ ${t}`;
-            document.getElementById('btn-wpp').href = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(msg)}`;
+            let resumo = "🛒 *Novo Pedido*\n";
+            Object.keys(carrinho).forEach(k => { if(carrinho[k]>0) resumo += `${carrinho[k]}x ${produtos[k].nome}\n`; });
+            resumo += `\n*Total: R$ ${t}*`;
+            document.getElementById('btn-wpp').href = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(resumo)}`;
         }
 
         function copiarPix() {
@@ -104,7 +122,7 @@
             area.setSelectionRange(0, 9999);
             document.execCommand('copy');
             document.body.removeChild(area);
-            alert("✅ PIX COPIADO! Agora cole no seu Banco.");
+            alert("✅ PIX COPIADO!");
         }
 
         carregarDados();
