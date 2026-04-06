@@ -3,109 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puro Suco - Oficial</title>
+    <title>Puro Suco V20</title>
     <style>
-        /* DESIGN V20 VOLTANDO AO ORIGINAL */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: #f8f9fa; }
-        .header { background: #1a1a1a; color: #fff; padding: 20px; text-align: center; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: #fff; }
+        .header { background: #1a1a1a; color: #fff; padding: 20px; text-align: center; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; position: sticky; top: 0; z-index: 100; }
         .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; padding-bottom: 120px; }
-        .card { background: #fff; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .card img { max-width: 100%; height: 100px; object-fit: contain; }
-        .card h3 { font-size: 14px; margin: 10px 0; color: #333; }
-        .preco { color: #27ae60; font-weight: 800; font-size: 18px; display: block; margin-bottom: 10px; }
-        .btn-add { background: #007bff; color: #fff; border: none; width: 40px; height: 40px; border-radius: 12px; font-size: 20px; font-weight: bold; }
-        
-        .barra { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); border-top: 4px solid #27ae60; z-index: 999; }
-        .btn-finalizar { background: #2ecc71; color: #fff; border: none; padding: 18px 30px; border-radius: 15px; font-weight: 900; text-transform: uppercase; }
-
-        /* MODAL DE PAGAMENTO */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-body { background: #fff; padding: 30px; border-radius: 25px; width: 90%; max-width: 380px; text-align: center; }
-        .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 20px; border-radius: 15px; font-weight: 900; width: 100%; margin: 20px 0; cursor: pointer; }
-        .btn-wpp { background: #27ae60; color: #fff; text-decoration: none; padding: 18px; border-radius: 15px; display: block; font-weight: 900; }
+        .card { background: #fff; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #efefef; }
+        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; }
+        .preco { color: #27ae60; font-weight: 800; font-size: 18px; display: block; margin: 10px 0; }
+        .btn-add { background: #007bff; color: #fff; border: none; width: 35px; height: 35px; border-radius: 10px; font-weight: bold; font-size: 20px; }
+        .barra { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 5px solid #27ae60; box-shadow: 0 -8px 20px rgba(0,0,0,0.1); z-index: 999; }
+        .btn-finalizar { background: #2ecc71; color: #fff; border: none; padding: 16px 25px; border-radius: 12px; font-weight: 900; text-transform: uppercase; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-body { background: #fff; padding: 25px; border-radius: 25px; width: 90%; max-width: 360px; text-align: center; }
+        .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 18px; border-radius: 15px; font-weight: 900; width: 100%; margin: 15px 0; }
     </style>
 </head>
 <body>
+
     <div class="header" id="loja-nome">CARREGANDO...</div>
     <div id="vitrine" class="vitrine"></div>
-    
     <div class="barra" id="barra" style="display:none">
-        <div style="font-weight:900; font-size:20px;">R$ <span id="total">0,00</span></div>
-        <button class="btn-finalizar" onclick="abrirModal()">FINALIZAR</button>
+        <div style="font-size:22px; font-weight:900;">R$ <span id="total-txt">0,00</span></div>
+        <button class="btn-finalizar" onclick="gerarEPagar()">FINALIZAR</button>
     </div>
 
     <div id="modal">
         <div class="modal-body">
             <h2>Pagamento</h2>
-            <p>Total: <strong id="total-m" style="font-size:24px; color:#27ae60;"></strong></p>
-            <button class="btn-pix" onclick="copiarPix()">1. CLIQUE AQUI PARA COPIAR PIX</button>
-            <a id="btn-wpp" href="#" target="_blank" class="btn-wpp">2. ENVIAR COMPROVANTE</a>
-            <button onclick="document.getElementById('modal').style.display='none'" style="margin-top:20px; background:none; border:none; color:#999;">CANCELAR</button>
+            <p>Total: <strong id="total-m" style="color:#27ae60; font-size:24px;"></strong></p>
+            <button class="btn-pix" id="btn-copy" onclick="copiarPix()">GERANDO CÓDIGO...</button>
+            <a id="btn-wpp" href="#" target="_blank" style="background:#27ae60; color:#fff; text-decoration:none; padding:18px; border-radius:15px; display:block; font-weight:900;">ENVIAR COMPROVANTE</a>
+            <button onclick="document.getElementById('modal').style.display='none'" style="margin-top:20px; background:none; border:none; color:#999; font-weight:bold;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzl4eCLXCrsnZeif23fNZpVCJx8zdLolxJMRbcG1ubRW8qBgb6Hkr-G2pnYEAeG0MElA/exec";
-        let dadosLoja = {}; let carrinho = {}; let produtos = [];
+        // COLA O LINK DA PLANILHA AQUI EMBAIXO:
+        const SCRIPT_URL = "COLE_AQUI_O_LINK_DO_PASSO_1";
 
-        async function carregar() {
-            const res = await fetch(SCRIPT_URL);
-            dadosLoja = await res.json();
-            document.getElementById('loja-nome').innerText = dadosLoja.nomeLoja;
-            let html = '';
-            dadosLoja.listaProdutos.forEach((p, i) => {
-                produtos.push({nome: p[1], preco: parseFloat(p[2])});
-                html += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><span class="preco">R$ ${p[2]}</span><div style="display:flex; align-items:center; justify-content:center; gap:10px;"><button class="btn-add" onclick="alt(${i},-1)">-</button><b id="q-${i}">0</b><button class="btn-add" onclick="alt(${i},1)">+</button></div></div>`;
+        let dados = {}; let car = {}; let prods = []; let pixMemo = "";
+
+        async function init() {
+            const r = await fetch(SCRIPT_URL);
+            dados = await r.json();
+            document.getElementById('loja-nome').innerText = dados.nomeLoja;
+            let h = '';
+            dados.listaProdutos.forEach((p, i) => {
+                prods.push({n: p[1], p: parseFloat(p[2])});
+                h += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><span class="preco">R$ ${p[2]}</span><div style="display:flex; align-items:center; justify-content:center; gap:10px;"><button class="btn-add" onclick="alt(${i},-1)">-</button><b id="q-${i}">0</b><button class="btn-add" onclick="alt(${i},1)">+</button></div></div>`;
             });
-            document.getElementById('vitrine').innerHTML = html;
+            document.getElementById('vitrine').innerHTML = h;
         }
 
         function alt(i, d) {
-            carrinho[i] = (carrinho[i] || 0) + d;
-            if(carrinho[i] < 0) carrinho[i] = 0;
-            document.getElementById(`q-${i}`).innerText = carrinho[i];
-            let t = 0; Object.keys(carrinho).forEach(k => t += carrinho[k] * produtos[k].preco);
-            document.getElementById('total').innerText = t.toFixed(2).replace('.', ',');
+            car[i] = (car[i] || 0) + d; if(car[i] < 0) car[i] = 0;
+            document.getElementById(`q-${i}`).innerText = car[i];
+            let t = 0; Object.keys(car).forEach(k => t += car[k] * prods[k].p);
+            document.getElementById('total-txt').innerText = t.toFixed(2).replace('.', ',');
             document.getElementById('barra').style.display = t > 0 ? 'flex' : 'none';
         }
 
-        function abrirModal() {
-            let t = document.getElementById('total').innerText;
-            document.getElementById('total-m').innerText = "R$ " + t;
-            let msg = `🛒 *Novo Pedido*\nTotal: R$ ${t}`;
-            document.getElementById('btn-wpp').href = `https://wa.me/${dadosLoja.whatsapp}?text=${encodeURIComponent(msg)}`;
+        async function gerarEPagar() {
+            const total = document.getElementById('total-txt').innerText;
+            document.getElementById('total-m').innerText = "R$ " + total;
             document.getElementById('modal').style.display = 'flex';
+            document.getElementById('btn-copy').innerText = "GERANDO...";
+            const r = await fetch(SCRIPT_URL + "?valor=" + total.replace(',', '.'));
+            const res = await r.json();
+            pixMemo = res.pix;
+            document.getElementById('btn-copy').innerText = "1. COPIAR CÓDIGO PIX";
+            document.getElementById('btn-wpp').href = `https://wa.me/${dados.whatsapp}?text=${encodeURIComponent('🛒 Pedido Total: R$ ' + total)}`;
         }
 
         function copiarPix() {
-            let valor = document.getElementById('total').innerText.replace(',', '.');
-            let chave = dadosLoja.pix.replace(/[^a-zA-Z0-9@.]/g, '');
-            
-            // STRING PIX BRCODE DINÂMICA
-            const f = (id, v) => id + String(v.length).padStart(2, '0') + v;
-            const info = f('00', 'br.gov.bcb.pix') + f('01', chave);
-            let p = f('00', '01') + f('26', info) + f('52', '0000') + f('53', '986') + f('54', valor) + f('58', 'BR') + f('59', 'LOJA') + f('60', 'SAOPAULO') + f('62', f('05', '***')) + '6304';
-            
-            // CÁLCULO CRC16
-            let crc = 0xFFFF;
-            for (let i = 0; i < p.length; i++) {
-                crc ^= (p.charCodeAt(i) << 8);
-                for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
-            }
-            let pixFinal = p + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-
-            // CÓPIA PARA IPHONE FORA DO GOOGLE SITES
-            const el = document.createElement('textarea');
-            el.value = pixFinal;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert("PIX COPIADO!");
+            const area = document.createElement('textarea');
+            area.value = pixMemo; document.body.appendChild(area); area.select();
+            document.execCommand('copy'); document.body.removeChild(area);
+            alert("✅ PIX COPIADO!");
         }
-
-        carregar();
+        init();
     </script>
 </body>
 </html>
