@@ -2,60 +2,187 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puro Suco - Oficial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
-        .header { background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 10px; font-weight: 900; margin-bottom: 20px; }
-        .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .card img { max-width: 100%; height: 80px; object-fit: contain; margin-bottom: 10px; }
-        .card h4 { margin: 5px 0; font-size: 14px; color: #333; }
-        .preco { color: #27ae60; font-weight: bold; font-size: 16px; display: block; margin-top: 5px; }
-        #msg-status { text-align: center; padding: 20px; font-weight: bold; color: #666; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        html, body { margin: 0 !important; padding: 0 !important; background: #ffffff; width: 100%; height: 100%; overflow: hidden; }
+        #app-wrapper { display: flex; flex-direction: column; height: 100vh; width: 100%; position: relative; }
+        .header { background: #1a1a1a; color: white; padding: 12px; text-align: center; flex-shrink: 0; }
+        .nome-loja { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+        .scroll-area { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 110px; -webkit-overflow-scrolling: touch; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .card { background: #ffffff; border-radius: 18px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f2f2f2; display: flex; flex-direction: column; justify-content: space-between; min-height: 185px; }
+        .card img { max-width: 100%; height: 80px; object-fit: contain; margin-bottom: 8px; }
+        .card h3 { font-size: 11px; margin: 5px 0; color: #333; height: 24px; overflow: hidden; font-weight: 700; line-height: 1.1; }
+        .preco { color: #27ae60; font-weight: 800; font-size: 15px; margin-bottom: 10px; display: block; }
+        .controles { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .btn-qtd { background: #007bff; color: white; border: none; width: 36px; height: 36px; border-radius: 12px; font-weight: bold; font-size: 22px; cursor: pointer; }
+        .qtd-val { font-weight: 800; font-size: 18px; min-width: 20px; color: #1a1a1a; }
+        .barra { position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 9999; border-top: 5px solid #27ae60; height: 85px; }
+        .btn-limpar { background: #ff4757; color: white; border: none; padding: 14px 18px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+        .btn-finalizar { background: #2ecc71; color: white; border: none; padding: 16px 28px; border-radius: 15px; font-weight: 800; font-size: 14px; text-transform: uppercase; cursor: pointer; }
+        
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-body { background: white; padding: 25px; border-radius: 30px; width: 90%; max-width: 350px; text-align: center; }
+        
+        /* BOTÃO PRINCIPAL DE PIX E BOTÕES SECUNDÁRIOS */
+        .btn-copiar-completo { background: #f0f7ff; border: 2px solid #007bff; color: #007bff; padding: 18px; border-radius: 15px; font-weight: 900; font-size: 15px; margin-bottom: 10px; cursor: pointer; display: block; width: 100%; text-transform: uppercase; }
+        .botoes-secundarios { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-secundario { flex: 1; padding: 10px; border-radius: 12px; border: 1px dashed #ccc; background: #f8f9fa; color: #666; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        
+        /* BOTÕES DE AÇÃO WHATSAPP */
+        .btn-pix { background:#27ae60; color:white; text-decoration:none; padding:18px; border-radius:18px; display:block; font-weight:900; font-size:14px; margin-bottom: 12px; text-transform: uppercase; }
+        .btn-anotar { background:#f39c12; color:white; text-decoration:none; padding:18px; border-radius:18px; display:block; font-weight:900; font-size:14px; margin-bottom: 12px; text-transform: uppercase; }
+        .btn-voltar { margin-top: 10px; border: 2px solid #ccc; background: #ffffff; color: #666; padding: 12px; border-radius: 15px; width: 100%; font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase; display: block; }
+
+        #toast { visibility: hidden; min-width: 200px; background-color: #2f3542; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 11000; left: 50%; bottom: 50%; transform: translate(-50%, 50%); font-weight: 800; }
+        #toast.show { visibility: visible; }
     </style>
 </head>
 <body>
+    <div id="app-wrapper">
+        <div class="header"><span id="nome-loja-txt" class="nome-loja">CARREGANDO...</span></div>
+        <div class="scroll-area">
+            <div id="loading-screen" style="text-align:center; padding-top:60px; color:#a4b0be; font-weight: bold;">SINCRONIZANDO...</div>
+            <div id="vitrine" class="grid" style="display: none;"></div>
+        </div>
+        <div class="barra" id="barra" style="display: none;">
+            <button class="btn-limpar" onclick="esvaziarCarrinho()">ESVAZIAR</button>
+            <div style="text-align: center;"><span style="font-size: 9px; color: #a4b0be; font-weight: 800;">VALOR TOTAL</span><br><span style="font-size: 20px; font-weight: 900; color: #2f3542;">R$ <span id="total">0,00</span></span></div>
+            <button class="btn-finalizar" onclick="abrirModal()">FINALIZAR</button>
+        </div>
+    </div>
+    <div id="toast"></div>
+    
+    <div id="modal">
+        <div class="modal-body">
+            <h3 style="margin:0 0 5px 0; font-size:18px;">PAGAMENTO PIX</h3>
+            <p style="margin-bottom: 15px;">Total: <strong id="total-m" style="color: #27ae60; font-size: 24px;"></strong></p>
+            
+            <button class="btn-copiar-completo" onclick="gerarECopiarPixCompleto()">
+                1. COPIAR PIX (COM VALOR)
+            </button>
 
-    <div class="header" id="nome-loja">CARREGANDO LOJA...</div>
-    <div id="msg-status">Conectando ao servidor...</div>
-    <div id="vitrine" class="vitrine"></div>
+            <div class="botoes-secundarios">
+                <button class="btn-secundario" onclick="copiarTexto(configLoja.pix, 'Chave PIX')">Só a Chave</button>
+                <button class="btn-secundario" onclick="copiarTexto(document.getElementById('total').innerText.replace(',','.'), 'Valor')">Só o Valor</button>
+            </div>
+
+            <a id="btn-wpp" href="#" onclick="concluirVenda('PAGO VIA PIX')" target="_blank" class="btn-pix">2. PAGUEI / ENVIAR COMPROVANTE</a>
+            
+            <a id="btn-anotar-wpp" href="#" onclick="concluirVenda('ANOTAR NO CONSUMO')" target="_blank" class="btn-anotar" style="display:none;">3. ANOTA AÍ / CONSUMO</a>
+            
+            <button class="btn-voltar" onclick="document.getElementById('modal').style.display='none'">VOLTAR AO CARRINHO</button>
+        </div>
+    </div>
 
     <script>
-        // O LINK QUE VOCÊ ME MANDOU E QUE ESTÁ FUNCIONANDO:
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_jBqB2KcS6OeeKuUBZSDNvDTXt-jjsBE9RiH3hNY29D_7xdaEBzaW_EiUFZXyRo1RGw/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbgX8V9G-5NX8RMlKmRlOcjk94uGXRZ8SeuNVBi1vGwSQGrsAt5yKbtg_uWI9eJmrzLw/exec";
+        let configLoja = {}; let car = {}; let listaProds = [];
 
-        async function carregar() {
-            const status = document.getElementById('msg-status');
+        async function inicializar() {
             try {
                 const res = await fetch(SCRIPT_URL);
-                const dados = await res.json();
-                
-                if (dados.error) {
-                    status.innerHTML = "❌ Erro na planilha: " + dados.error;
-                    return;
-                }
-
-                document.getElementById('nome-loja').innerText = dados.nomeLoja;
-                status.style.display = "none";
-                
+                const data = await res.json();
+                configLoja = data;
+                document.getElementById('nome-loja-txt').innerText = data.nomeLoja;
+                if(data.btnConsumo === "SIM") document.getElementById('btn-anotar-wpp').style.display = 'block';
                 let html = '';
-                dados.listaProdutos.forEach(p => {
-                    html += `
-                        <div class="card">
-                            <img src="${p[0]}" onerror="this.src='https://via.placeholder.com/80?text=Suco'">
-                            <h4>${p[1]}</h4>
-                            <span class="preco">R$ ${parseFloat(p[2]).toFixed(2).replace('.', ',')}</span>
-                        </div>`;
+                data.listaProdutos.forEach((p, i) => {
+                    listaProds.push({ n: p[1], p: parseFloat(p[2]) || 0 });
+                    html += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><b class="preco">R$ ${parseFloat(p[2]).toFixed(2).replace('.', ',')}</b><div class="controles"><button class="btn-qtd" onclick="alt(${i},-1)">-</button><span class="qtd-val" id="q-${i}">0</span><button class="btn-qtd" onclick="alt(${i},1)">+</button></div></div>`;
                 });
-                document.getElementById('vitrine').innerHTML = html;
-
-            } catch (e) {
-                status.innerHTML = "❌ Erro de Conexão.<br><small>Tente apertar Ctrl+F5 ou verifique o link.</small>";
-                console.error(e);
-            }
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('vitrine').innerHTML = html; document.getElementById('vitrine').style.display = 'grid';
+            } catch (e) { console.error(e); }
         }
-        carregar();
+
+        function alt(i, d) {
+            car[i] = (car[i] || 0) + d; if(car[i] < 0) car[i] = 0;
+            document.getElementById(`q-${i}`).innerText = car[i];
+            let t = 0; Object.keys(car).forEach(k => t += car[k] * listaProds[k].p);
+            document.getElementById('total').innerText = t.toFixed(2).replace('.', ',');
+            document.getElementById('barra').style.display = t > 0 ? 'flex' : 'none';
+        }
+
+        function esvaziarCarrinho() {
+            car = {}; document.querySelectorAll('.qtd-val').forEach(el => el.innerText = '0');
+            document.getElementById('total').innerText = '0,00'; document.getElementById('barra').style.display = 'none';
+        }
+
+        function abrirModal() {
+            let t = document.getElementById('total').innerText;
+            document.getElementById('total-m').innerText = "R$ " + t;
+            let m = `🛒 *PEDIDO - ${configLoja.nomeLoja}*\n\n`;
+            Object.keys(car).forEach(k => { if(car[k] > 0) m += `✅ ${car[k]}x ${listaProds[k].n}\n`; });
+            m += `\n💰 *TOTAL: R$ ${t}*`;
+            document.getElementById('btn-wpp').href = `https://wa.me/${configLoja.whatsapp}?text=${encodeURIComponent(m + '\n\n💳 *Status: PAGO VIA PIX*')}`;
+            document.getElementById('btn-anotar-wpp').href = `https://wa.me/${configLoja.whatsapp}?text=${encodeURIComponent(m + '\n\n📝 *Status: ANOTAR NO CONSUMO*')}`;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // MOTOR DE PIX PROFISSIONAL (ALGORITMO PADRÃO BRASIL)
+        function gerarECopiarPixCompleto() {
+            let valorNum = document.getElementById('total').innerText.replace(',', '.');
+            
+            // Limpa formatação mantendo o que for útil
+            let chaveLimpa = configLoja.pix.replace(/[\s\(\)\-]/g, '');
+            
+            const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
+            const info = f('00', 'br.gov.bcb.pix') + f('01', chaveLimpa);
+            
+            // Nome sem acentos ou '&' para evitar quebra no banco
+            let payload = f('00', '01') + 
+                          f('26', info) + 
+                          f('52', '0000') + 
+                          f('53', '986') + 
+                          f('54', valorNum) + 
+                          f('58', 'BR') + 
+                          f('59', 'PURO SUCO') + 
+                          f('60', 'SAO PAULO') + 
+                          f('62', f('05', '***')) + 
+                          '6304';
+            
+            // Calculador de Criptografia CRC16
+            let crc = 0xFFFF;
+            for (let i = 0; i < payload.length; i++) {
+                crc ^= (payload.charCodeAt(i) << 8);
+                for (let j = 0; j < 8; j++) {
+                    if ((crc & 0x8000) !== 0) {
+                        crc = (crc << 1) ^ 0x1021;
+                    } else {
+                        crc = crc << 1;
+                    }
+                }
+                crc &= 0xFFFF;
+            }
+            
+            let pixBRCode = payload + crc.toString(16).toUpperCase().padStart(4, '0');
+            copiarTexto(pixBRCode, 'PIX COMPLETO');
+        }
+
+        function copiarTexto(texto, label) {
+            const temp = document.createElement('textarea');
+            temp.value = texto;
+            document.body.appendChild(temp);
+            temp.select();
+            temp.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            
+            const x = document.getElementById("toast");
+            x.innerText = label + " copiado!";
+            x.className = "show"; setTimeout(() => x.className = "", 2000);
+        }
+
+        function concluirVenda(tipo) {
+            let t = document.getElementById('total').innerText;
+            let itens = [];
+            Object.keys(car).forEach(k => { if(car[k] > 0) itens.push({nome: listaProds[k].n, qtd: car[k]}); });
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ itens, total: t, status: tipo }), mode: "no-cors" });
+            setTimeout(() => { esvaziarCarrinho(); document.getElementById('modal').style.display = 'none'; }, 1000);
+        }
+        inicializar();
     </script>
 </body>
 </html>
