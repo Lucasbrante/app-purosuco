@@ -2,115 +2,60 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puro Suco - Oficial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puro Suco - Resgate</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: #f9f9f9; color: #333; }
-        .header { background: #1a1a1a; color: #fff; padding: 20px; text-align: center; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; position: sticky; top: 0; z-index: 100; }
-        .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; padding-bottom: 120px; }
-        .card { background: #fff; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eaeaea; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
-        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; }
-        .preco { color: #27ae60; font-weight: 900; font-size: 18px; margin: 8px 0; display: block; }
-        .btn-add { background: #007bff; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px; }
-        .barra { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 4px solid #27ae60; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 999; }
-        .btn-finalizar { background: #2ecc71; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-body { background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
-        .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 18px; border-radius: 12px; font-weight: 900; width: 100%; margin: 15px 0; cursor: pointer; font-size: 14px; }
-        #msg-erro { color: #d32f2f; font-weight: bold; padding: 20px; text-align: center; background: #ffebee; margin: 15px; border-radius: 10px; display: none; word-wrap: break-word; }
+        body { font-family: sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; font-weight: bold; border-radius: 10px; margin-bottom: 20px; }
+        .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; }
+        .preco { color: #27ae60; font-weight: bold; font-size: 18px; }
+        .erro { background: #ffebee; color: #c62828; padding: 20px; border-radius: 10px; font-weight: bold; text-align: center; display: none; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="header" id="nome-loja">CARREGANDO...</div>
-    <div id="msg-erro"></div>
-    <div id="vitrine" class="vitrine"></div>
-    
-    <div class="barra" id="barra" style="display:none">
-        <div style="font-size:20px; font-weight:900;">R$ <span id="total-txt">0,00</span></div>
-        <button class="btn-finalizar" onclick="abrirPg()">FINALIZAR</button>
-    </div>
 
-    <div id="modal">
-        <div class="modal-body">
-            <h3 style="margin-top:0">Pagamento</h3>
-            <p style="color:#666">Valor total:<br><strong id="total-m" style="color:#27ae60; font-size:28px;"></strong></p>
-            <button class="btn-pix" id="btn-copy" onclick="copiarPix()">COPIAR CHAVE PIX</button>
-            <button onclick="document.getElementById('modal').style.display='none'" style="margin-top:15px; border:none; background:none; color:#999; font-weight:bold; cursor:pointer;">VOLTAR</button>
-        </div>
-    </div>
+    <div class="header" id="nome-loja">CARREGANDO...</div>
+    <div id="msg-erro" class="erro"></div>
+    <div id="vitrine" class="vitrine"></div>
 
     <script>
-        // SEU LINK DO GOOGLE SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvDRMWzsGmWbh6SePPJan-Bx_ImpeZ_UTp_qxyHM5hQV5XQY74WW_kWzaZsMZK85p7yg/exec";
-        
-        let config = {}; let car = {}; let prods = []; let pixMemo = "";
+        // === COLE AQUI O SEU LINK NOVO DO GOOGLE APPS SCRIPT ===
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4UA1ryxKJGwV-q46gKt4T0RnqMl8qy3JuSbyMnp9KodTay2WNU0WQc7vUOqMyXR7Og/exec";
 
-        async function init() {
+        async function carregarVitrine() {
             try {
-                const r = await fetch(SCRIPT_URL);
-                if (!r.ok) throw new Error("Erro de conexão. O Google Script não permitiu o acesso (Verifique se está para 'Qualquer Pessoa').");
+                const resposta = await fetch(SCRIPT_URL);
+                if (!resposta.ok) throw new Error("O Google bloqueou o acesso. Refaça a implantação para 'Qualquer Pessoa'.");
                 
-                config = await r.json();
+                const dados = await resposta.json();
                 
-                if (config.error) throw new Error("Erro na planilha: " + config.error);
+                if (dados.error) throw new Error("Erro lá na planilha: " + dados.error);
 
-                document.getElementById('nome-loja').innerText = config.nomeLoja || "PURO SUCO";
-                let html = '';
-                config.listaProdutos.forEach((p, i) => {
-                    prods.push({nome: p[1], preco: parseFloat(p[2])});
-                    html += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><span class="preco">R$ ${p[2].toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span><div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:10px;"><button class="btn-add" onclick="alt(${i},-1)">-</button><b id="q-${i}" style="font-size:18px;">0</b><button class="btn-add" onclick="alt(${i},1)">+</button></div></div>`;
+                document.getElementById('nome-loja').innerText = dados.nomeLoja || "PURO SUCO";
+                
+                let htmlVitrine = '';
+                dados.listaProdutos.forEach(p => {
+                    let precoFormatado = parseFloat(p[2]).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                    htmlVitrine += `<div class="card">
+                        <img src="${p[0]}">
+                        <h4>${p[1]}</h4>
+                        <span class="preco">R$ ${precoFormatado}</span>
+                    </div>`;
                 });
-                document.getElementById('vitrine').innerHTML = html;
-            } catch (e) { 
-                document.getElementById('nome-loja').innerText = "ERRO";
-                const divErro = document.getElementById('msg-erro');
-                divErro.style.display = 'block';
-                divErro.innerText = "Detalhe do Erro: " + e.message;
-            }
-        }
+                
+                document.getElementById('vitrine').innerHTML = htmlVitrine;
 
-        function alt(i, d) {
-            car[i] = (car[i] || 0) + d; if(car[i] < 0) car[i] = 0;
-            document.getElementById(`q-${i}`).innerText = car[i];
-            let t = 0; Object.keys(car).forEach(k => t += car[k] * prods[k].preco);
-            document.getElementById('total-txt').innerText = t.toFixed(2).replace('.', ',');
-            document.getElementById('barra').style.display = t > 0 ? 'flex' : 'none';
-        }
-
-        async function abrirPg() {
-            const t = document.getElementById('total-txt').innerText;
-            document.getElementById('total-m').innerText = "R$ " + t;
-            document.getElementById('modal').style.display = 'flex';
-            document.getElementById('btn-copy').innerText = "GERANDO PIX...";
-            
-            try {
-                const r = await fetch(SCRIPT_URL + "?valor=" + t.replace(',', '.'));
-                const res = await r.json();
-                pixMemo = res.pix;
-                document.getElementById('btn-copy').innerText = "✅ CLIQUE PARA COPIAR PIX";
             } catch (e) {
-                document.getElementById('btn-copy').innerText = "ERRO AO GERAR PIX";
+                document.getElementById('nome-loja').innerText = "FALHA NA CONEXÃO";
+                document.getElementById('msg-erro').style.display = "block";
+                document.getElementById('msg-erro').innerText = e.message;
             }
         }
 
-        function copiarPix() {
-            if(!pixMemo) return;
-            navigator.clipboard.writeText(pixMemo).then(() => {
-                const btn = document.getElementById('btn-copy');
-                btn.innerText = "COPIADO COM SUCESSO!";
-                btn.style.background = "#e6ffef";
-                btn.style.borderColor = "#27ae60";
-                btn.style.color = "#27ae60";
-                setTimeout(() => {
-                    btn.innerText = "✅ CLIQUE PARA COPIAR PIX";
-                    btn.style.background = "#f0f7ff";
-                    btn.style.borderColor = "#007bff";
-                    btn.style.color = "#007bff";
-                }, 3000);
-            });
-        }
-        init();
+        carregarVitrine();
     </script>
+
 </body>
 </html>
