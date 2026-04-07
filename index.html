@@ -3,129 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Puro Suco V20 - OFICIAL</title>
+    <title>Puro Suco - Oficial</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: #ffffff; color: #1a1a1a; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: #f9f9f9; color: #333; }
         .header { background: #1a1a1a; color: #fff; padding: 20px; text-align: center; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; position: sticky; top: 0; z-index: 100; }
         .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; padding-bottom: 120px; }
-        .card { background: #fff; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #efefef; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
-        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; border-radius: 10px; }
-        .card h3 { font-size: 13px; margin: 5px 0; height: 32px; overflow: hidden; line-height: 1.2; }
-        .preco { color: #27ae60; font-weight: 800; font-size: 18px; margin: 8px 0; display: block; }
-        .controles { display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .btn-add { background: #007bff; color: #fff; border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; }
-        .qtd { font-weight: 800; font-size: 16px; min-width: 20px; }
-        .barra { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 5px solid #27ae60; box-shadow: 0 -8px 20px rgba(0,0,0,0.1); z-index: 999; }
-        .btn-finalizar { background: #2ecc71; color: #fff; border: none; padding: 16px 25px; border-radius: 12px; font-weight: 900; text-transform: uppercase; font-size: 14px; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-body { background: #fff; padding: 25px; border-radius: 25px; width: 90%; max-width: 360px; text-align: center; }
-        .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 18px; border-radius: 15px; font-weight: 900; width: 100%; margin: 15px 0; cursor: pointer; font-size: 13px; }
-        .btn-wpp { background: #27ae60; color: #fff; text-decoration: none; padding: 18px; border-radius: 15px; display: block; font-weight: 900; font-size: 14px; text-transform: uppercase; }
-        #status-msg { padding: 20px; text-align: center; font-weight: bold; color: #999; }
+        .card { background: #fff; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eaeaea; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
+        .card img { max-width: 100%; height: 90px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; }
+        .preco { color: #27ae60; font-weight: 900; font-size: 18px; margin: 8px 0; display: block; }
+        .btn-add { background: #007bff; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px; }
+        .barra { position: fixed; bottom: 0; width: 100%; background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 4px solid #27ae60; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 999; }
+        .btn-finalizar { background: #2ecc71; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-body { background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+        .btn-pix { background: #f0f7ff; border: 2px dashed #007bff; color: #007bff; padding: 18px; border-radius: 12px; font-weight: 900; width: 100%; margin: 15px 0; cursor: pointer; font-size: 14px; }
+        #msg-erro { color: #d32f2f; font-weight: bold; padding: 20px; text-align: center; background: #ffebee; margin: 15px; border-radius: 10px; display: none; word-wrap: break-word; }
     </style>
 </head>
 <body>
-
-    <div class="header" id="loja-nome">CARREGANDO...</div>
-    <div id="status-msg">Conectando à planilha...</div>
+    <div class="header" id="nome-loja">CARREGANDO...</div>
+    <div id="msg-erro"></div>
     <div id="vitrine" class="vitrine"></div>
     
-    <div class="barra" id="barra-pedido" style="display:none">
-        <div style="line-height:1">
-            <small style="font-size:10px; font-weight:700; color:#999; text-transform:uppercase;">Total</small>
-            <div style="font-size:22px; font-weight:900;">R$ <span id="valor-total">0,00</span></div>
-        </div>
-        <button class="btn-finalizar" onclick="abrirPagamento()">Finalizar</button>
+    <div class="barra" id="barra" style="display:none">
+        <div style="font-size:20px; font-weight:900;">R$ <span id="total-txt">0,00</span></div>
+        <button class="btn-finalizar" onclick="abrirPg()">FINALIZAR</button>
     </div>
 
     <div id="modal">
         <div class="modal-body">
-            <h2 style="margin-top:0">Pagamento</h2>
-            <p>Total a pagar: <strong id="m-total" style="font-size:26px; color:#27ae60"></strong></p>
-            <button class="btn-pix" id="btn-copy-pix" onclick="copiarPix()">GERANDO CÓDIGO...</button>
-            <a id="btn-wpp" href="#" target="_blank" class="btn-wpp">ENVIAR COMPROVANTE</a>
-            <button onclick="document.getElementById('modal').style.display='none'" style="margin-top:20px; background:none; border:none; color:#999; font-weight:700; font-size:11px;">VOLTAR</button>
+            <h3 style="margin-top:0">Pagamento</h3>
+            <p style="color:#666">Valor total:<br><strong id="total-m" style="color:#27ae60; font-size:28px;"></strong></p>
+            <button class="btn-pix" id="btn-copy" onclick="copiarPix()">COPIAR CHAVE PIX</button>
+            <button onclick="document.getElementById('modal').style.display='none'" style="margin-top:15px; border:none; background:none; color:#999; font-weight:bold; cursor:pointer;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // SEU LINK JÁ CONFIGURADO
+        // SEU LINK DO GOOGLE SCRIPT
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJFheNePSmyffRDfVQn1rt4YkZ4iTCIC2PoJUvvLOit4P7OLjHHXljSI77pXtCVWmjBg/exec";
+        
+        let config = {}; let car = {}; let prods = []; let pixMemo = "";
 
-        let config = {}; let carrinho = {}; let produtos = []; let pixMemo = "";
-
-        async function carregarDados() {
+        async function init() {
             try {
-                const res = await fetch(SCRIPT_URL);
-                if (!res.ok) throw new Error();
-                config = await res.json();
+                const r = await fetch(SCRIPT_URL);
+                if (!r.ok) throw new Error("Erro de conexão. O Google Script não permitiu o acesso (Verifique se está para 'Qualquer Pessoa').");
                 
-                document.getElementById('loja-nome').innerText = config.nomeLoja;
-                document.getElementById('status-msg').style.display = 'none';
+                config = await r.json();
                 
+                if (config.error) throw new Error("Erro na planilha: " + config.error);
+
+                document.getElementById('nome-loja').innerText = config.nomeLoja || "PURO SUCO";
                 let html = '';
                 config.listaProdutos.forEach((p, i) => {
-                    produtos.push({nome: p[1], preco: parseFloat(p[2])});
-                    html += `<div class="card">
-                        <img src="${p[0]}" onerror="this.src='https://via.placeholder.com/150?text=Suco'">
-                        <h3>${p[1]}</h3>
-                        <b class="preco">R$ ${p[2].toLocaleString('pt-br',{minimumFractionDigits:2})}</b>
-                        <div class="controles">
-                            <button class="btn-add" onclick="mudarQtd(${i},-1)">-</button>
-                            <span class="qtd" id="q-${i}">0</span>
-                            <button class="btn-add" onclick="mudarQtd(${i},1)">+</button>
-                        </div>
-                    </div>`;
+                    prods.push({nome: p[1], preco: parseFloat(p[2])});
+                    html += `<div class="card"><img src="${p[0]}"><h3>${p[1]}</h3><span class="preco">R$ ${p[2].toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span><div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:10px;"><button class="btn-add" onclick="alt(${i},-1)">-</button><b id="q-${i}" style="font-size:18px;">0</b><button class="btn-add" onclick="alt(${i},1)">+</button></div></div>`;
                 });
                 document.getElementById('vitrine').innerHTML = html;
             } catch (e) { 
-                document.getElementById('status-msg').innerText = "ERRO: Verifique se as abas CONFIG e PRODUTOS existem e se o Script foi implantado para 'Qualquer Pessoa'.";
-                document.getElementById('status-msg').style.color = "red";
+                document.getElementById('nome-loja').innerText = "ERRO";
+                const divErro = document.getElementById('msg-erro');
+                divErro.style.display = 'block';
+                divErro.innerText = "Detalhe do Erro: " + e.message;
             }
         }
 
-        function mudarQtd(i, delta) {
-            carrinho[i] = (carrinho[i] || 0) + delta;
-            if(carrinho[i] < 0) carrinho[i] = 0;
-            document.getElementById(`q-${i}`).innerText = carrinho[i];
-            let total = 0; Object.keys(carrinho).forEach(k => total += carrinho[k] * produtos[k].preco);
-            document.getElementById('valor-total').innerText = total.toFixed(2).replace('.', ',');
-            document.getElementById('barra-pedido').style.display = total > 0 ? 'flex' : 'none';
+        function alt(i, d) {
+            car[i] = (car[i] || 0) + d; if(car[i] < 0) car[i] = 0;
+            document.getElementById(`q-${i}`).innerText = car[i];
+            let t = 0; Object.keys(car).forEach(k => t += car[k] * prods[k].preco);
+            document.getElementById('total-txt').innerText = t.toFixed(2).replace('.', ',');
+            document.getElementById('barra').style.display = t > 0 ? 'flex' : 'none';
         }
 
-        async function abrirPagamento() {
-            const t = document.getElementById('valor-total').innerText;
-            document.getElementById('m-total').innerText = "R$ " + t;
+        async function abrirPg() {
+            const t = document.getElementById('total-txt').innerText;
+            document.getElementById('total-m').innerText = "R$ " + t;
             document.getElementById('modal').style.display = 'flex';
-            document.getElementById('btn-copy-pix').innerText = "GERANDO CÓDIGO...";
-
+            document.getElementById('btn-copy').innerText = "GERANDO PIX...";
+            
             try {
-                const res = await fetch(SCRIPT_URL + "?valor=" + t.replace(',', '.'));
-                const dadosPix = await res.json();
-                pixMemo = dadosPix.pix;
-                document.getElementById('btn-copy-pix').innerText = "1. CLIQUE PARA COPIAR PIX";
-            } catch (e) { document.getElementById('btn-copy-pix').innerText = "ERRO AO GERAR PIX"; }
-
-            let resumo = "🛒 *Novo Pedido*\n";
-            Object.keys(carrinho).forEach(k => { if(carrinho[k]>0) resumo += `${carrinho[k]}x ${produtos[k].nome}\n`; });
-            resumo += `\n*Total: R$ ${t}*`;
-            document.getElementById('btn-wpp').href = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(resumo)}`;
+                const r = await fetch(SCRIPT_URL + "?valor=" + t.replace(',', '.'));
+                const res = await r.json();
+                pixMemo = res.pix;
+                document.getElementById('btn-copy').innerText = "✅ CLIQUE PARA COPIAR PIX";
+            } catch (e) {
+                document.getElementById('btn-copy').innerText = "ERRO AO GERAR PIX";
+            }
         }
 
         function copiarPix() {
             if(!pixMemo) return;
-            const area = document.createElement('textarea');
-            area.value = pixMemo;
-            document.body.appendChild(area);
-            area.select();
-            area.setSelectionRange(0, 9999);
-            document.execCommand('copy');
-            document.body.removeChild(area);
-            alert("✅ PIX COPIADO!");
+            navigator.clipboard.writeText(pixMemo).then(() => {
+                const btn = document.getElementById('btn-copy');
+                btn.innerText = "COPIADO COM SUCESSO!";
+                btn.style.background = "#e6ffef";
+                btn.style.borderColor = "#27ae60";
+                btn.style.color = "#27ae60";
+                setTimeout(() => {
+                    btn.innerText = "✅ CLIQUE PARA COPIAR PIX";
+                    btn.style.background = "#f0f7ff";
+                    btn.style.borderColor = "#007bff";
+                    btn.style.color = "#007bff";
+                }, 3000);
+            });
         }
-
-        carregarDados();
+        init();
     </script>
 </body>
 </html>
