@@ -5,58 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puro Suco - Oficial</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
-        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; font-weight: 900; border-radius: 12px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        body { font-family: -apple-system, sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
+        .header { background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 10px; font-weight: 900; margin-bottom: 20px; }
         .vitrine { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .card img { max-width: 100%; height: 100px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; }
-        .card h4 { margin: 10px 0 5px 0; font-size: 14px; color: #444; }
-        .preco { color: #27ae60; font-weight: 900; font-size: 18px; display: block; margin-bottom: 10px; }
-        .btn-add { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
-        #msg-erro { background: #ffebee; color: #c62828; padding: 20px; border-radius: 10px; font-weight: bold; text-align: center; display: none; margin-bottom: 20px; border: 1px solid #ef9a9a; }
+        .card { background: #fff; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card img { max-width: 100%; height: 80px; object-fit: contain; margin-bottom: 10px; }
+        .card h4 { margin: 5px 0; font-size: 14px; color: #333; }
+        .preco { color: #27ae60; font-weight: bold; font-size: 16px; display: block; margin-top: 5px; }
+        #msg-status { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="header" id="nome-loja">CARREGANDO...</div>
-    <div id="msg-erro"></div>
+    <div class="header" id="nome-loja">CARREGANDO LOJA...</div>
+    <div id="msg-status">Conectando ao servidor...</div>
     <div id="vitrine" class="vitrine"></div>
 
     <script>
-        // SEU LINK NOVINHO QUE FUNCIONOU:
+        // O LINK QUE VOCÊ ME MANDOU E QUE ESTÁ FUNCIONANDO:
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_jBqB2KcS6OeeKuUBZSDNvDTXt-jjsBE9RiH3hNY29D_7xdaEBzaW_EiUFZXyRo1RGw/exec";
 
-        async function carregarLoja() {
+        async function carregar() {
+            const status = document.getElementById('msg-status');
             try {
                 const res = await fetch(SCRIPT_URL);
-                if (!res.ok) throw new Error("Erro na conexão com o Google.");
                 const dados = await res.json();
                 
-                if (dados.error) throw new Error("Erro na planilha: " + dados.error);
+                if (dados.error) {
+                    status.innerHTML = "❌ Erro na planilha: " + dados.error;
+                    return;
+                }
 
-                document.getElementById('nome-loja').innerText = dados.nomeLoja || "PURO SUCO";
+                document.getElementById('nome-loja').innerText = dados.nomeLoja;
+                status.style.display = "none";
                 
                 let html = '';
                 dados.listaProdutos.forEach(p => {
-                    let preco = parseFloat(p[2]).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
                     html += `
                         <div class="card">
-                            <img src="${p[0]}" onerror="this.src='https://via.placeholder.com/100?text=Suco'">
+                            <img src="${p[0]}" onerror="this.src='https://via.placeholder.com/80?text=Suco'">
                             <h4>${p[1]}</h4>
-                            <span class="preco">${preco}</span>
-                            <button class="btn-add">ADICIONAR</button>
+                            <span class="preco">R$ ${parseFloat(p[2]).toFixed(2).replace('.', ',')}</span>
                         </div>`;
                 });
                 document.getElementById('vitrine').innerHTML = html;
 
             } catch (e) {
-                document.getElementById('nome-loja').innerText = "INDISPONÍVEL";
-                const divErro = document.getElementById('msg-erro');
-                divErro.style.display = "block";
-                divErro.innerText = "Atenção: " + e.message;
+                status.innerHTML = "❌ Erro de Conexão.<br><small>Tente apertar Ctrl+F5 ou verifique o link.</small>";
+                console.error(e);
             }
         }
-        carregarLoja();
+        carregar();
     </script>
 </body>
 </html>
